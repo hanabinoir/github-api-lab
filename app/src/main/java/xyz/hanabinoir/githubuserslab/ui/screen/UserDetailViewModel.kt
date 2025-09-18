@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import xyz.hanabinoir.githubuserslab.model.UserDetail
 import xyz.hanabinoir.githubuserslab.model.UserEvent
 import xyz.hanabinoir.githubuserslab.network.UserRepository
@@ -28,21 +29,28 @@ class UserDetailViewModel @Inject constructor(
         private set
 
     fun getUserDetail(username: String) {
+        Timber.i("Loading user detail for $username")
         viewModelScope.launch {
             uiState = try {
                 val userDetail = userRepository.getUserDetail(username)
+                Timber.i("Successfully loaded user detail for $username")
                 UserDetailUiState.Success(userDetail)
             } catch (e: Exception) {
+                Timber.e(e.localizedMessage)
                 UserDetailUiState.Error
             }
         }
     }
 
     fun getUserEvents(username: String) {
+        Timber.i("Loading user events for $username")
         viewModelScope.launch {
             userEvents = try {
-                userRepository.getUserEvents(username)
+                val events = userRepository.getUserEvents(username)
+                Timber.i("Successfully loaded user events for $username, count: ${events.size}")
+                events
             } catch (e: Exception) {
+                Timber.e(e.localizedMessage)
                 emptyList()
             }
         }

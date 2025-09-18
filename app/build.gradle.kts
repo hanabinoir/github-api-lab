@@ -74,6 +74,9 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.runtime.livedata)
 
+    // Timber
+    implementation(libs.timber)
+
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 

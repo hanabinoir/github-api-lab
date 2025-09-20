@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.LocationOn
@@ -44,6 +45,8 @@ import coil.compose.AsyncImage
 import com.guru.fontawesomecomposelib.FaIcon
 import com.guru.fontawesomecomposelib.FaIcons
 import xyz.hanabinoir.githubuserslab.model.UserDetail
+import xyz.hanabinoir.githubuserslab.model.UserEvent
+import xyz.hanabinoir.githubuserslab.utility.toLocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +80,7 @@ fun UserDetailScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 item {
-                    UserProfileContent(uiState.userDetail)
+                    UserProfileContent(username, uiState.userDetail)
                 }
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -103,7 +106,7 @@ fun UserDetailScreen(
                         )
                     }
                     items(viewModel.userEvents) { event ->
-                        Text("${event.createdAt}  ${event.repo.name}  ${event.type}")
+                        UserEventItem(event)
                     }
                 }
             }
@@ -112,7 +115,7 @@ fun UserDetailScreen(
 }
 
 @Composable
-fun UserProfileContent(userDetail: UserDetail) {
+fun UserProfileContent(username: String, userDetail: UserDetail) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -138,8 +141,8 @@ fun UserProfileContent(userDetail: UserDetail) {
             )
         }
         userDetail.bio?.let { Text(text = it) }
-        val htmlUrl = createLinkedText(userDetail.htmlUrl)
-        UserDetailItem(htmlUrl) { FaIcon(FaIcons.Github) }
+        val github = createLinkedText(username, userDetail.htmlUrl)
+        UserDetailItem(github) { FaIcon(FaIcons.Github) }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 4.dp)
@@ -161,7 +164,7 @@ fun UserProfileContent(userDetail: UserDetail) {
         Spacer(modifier = Modifier.height(16.dp))
 
         userDetail.company?.let {
-            UserDetailItem(AnnotatedString(it)) { FaIcon(FaIcons.Building) }
+            UserDetailItem(AnnotatedString(it)) { Icon(Icons.Outlined.Business, contentDescription = "Company") }
         }
 
         userDetail.blog?.let {
@@ -234,5 +237,18 @@ private fun createLinkedText(url: String): AnnotatedString {
         ) {
             append(url)
         }
+    }
+}
+
+@Composable
+fun UserEventItem(userEvent: UserEvent) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+    ) {
+        Text(text = userEvent.type)
+        Text(text = userEvent.repo.name)
+        Text(text = userEvent.createdAt.toLocalDateTime())
     }
 }

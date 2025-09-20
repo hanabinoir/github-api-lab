@@ -24,20 +24,21 @@ class MainViewModel @Inject constructor(
 ): ViewModel() {
     var uiState: HomeUiState by mutableStateOf(HomeUiState.Loading)
         private set
-
-    init {
-        getUsers()
-    }
+    var isRefreshing by mutableStateOf(false)
+        private set
 
     fun getUsers() {
         Timber.i("Loading users list")
         viewModelScope.launch {
             uiState = try {
+                isRefreshing = uiState is HomeUiState.Success
                 val users = userRepository.getUsers()
                 Timber.i("Successfully loaded users list, count: ${users.size}")
+                isRefreshing = false
                 HomeUiState.Success(users)
             } catch (e: Exception) {
                 Timber.e(e.localizedMessage)
+                isRefreshing = false
                 HomeUiState.Error
             }
         }

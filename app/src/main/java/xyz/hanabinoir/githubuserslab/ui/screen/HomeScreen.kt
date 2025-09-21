@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -25,6 +27,10 @@ fun HomeScreen(
     viewModel: MainViewModel = hiltViewModel(),
     onUserClick: (String) -> Unit
 ) {
+    LaunchedEffect(true) {
+        viewModel.getUsers()
+    }
+
     val uiState = viewModel.uiState
     when (uiState) {
         is HomeUiState.Loading -> {
@@ -42,12 +48,18 @@ fun HomeScreen(
             }
         }
         is HomeUiState.Success -> {
-            LazyColumn(
+            PullToRefreshBox(
+                isRefreshing = viewModel.isRefreshing,
+                onRefresh = { viewModel.getUsers() },
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(uiState.users) { user ->
-                    UserItemRow(user = user, onClick = { onUserClick(user.login) })
-                    HorizontalDivider()
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(uiState.users) { user ->
+                        UserItemRow(user = user, onClick = { onUserClick(user.login) })
+                        HorizontalDivider()
+                    }
                 }
             }
         }

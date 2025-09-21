@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.LocationOn
@@ -29,8 +30,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -38,6 +45,8 @@ import coil.compose.AsyncImage
 import com.guru.fontawesomecomposelib.FaIcon
 import com.guru.fontawesomecomposelib.FaIcons
 import xyz.hanabinoir.githubuserslab.model.UserDetail
+import xyz.hanabinoir.githubuserslab.model.UserEvent
+import xyz.hanabinoir.githubuserslab.utility.toLocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +80,7 @@ fun UserDetailScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 item {
-                    UserProfileContent(uiState.userDetail)
+                    UserProfileContent(username, uiState.userDetail)
                 }
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -97,7 +106,7 @@ fun UserDetailScreen(
                         )
                     }
                     items(viewModel.userEvents) { event ->
-                        Text("${event.createdAt}  ${event.repo.name}  ${event.type}")
+                        UserEventItem(event)
                     }
                 }
             }
@@ -106,7 +115,7 @@ fun UserDetailScreen(
 }
 
 @Composable
-fun UserProfileContent(userDetail: UserDetail) {
+fun UserProfileContent(username: String, userDetail: UserDetail) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -132,7 +141,8 @@ fun UserProfileContent(userDetail: UserDetail) {
             )
         }
         userDetail.bio?.let { Text(text = it) }
-        UserDetailItem(userDetail.htmlUrl) { FaIcon(FaIcons.Github) }
+        val github = createLinkedText(username, userDetail.htmlUrl)
+        UserDetailItem(github) { FaIcon(FaIcons.Github) }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 4.dp)
@@ -140,6 +150,7 @@ fun UserProfileContent(userDetail: UserDetail) {
             Icon(Icons.Outlined.Person, contentDescription = "Followers")
             Text(text = "Followers: ${userDetail.followers}  Following: ${userDetail.following}")
         }
+
         userDetail.hireable?.let {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "Available for hiring: ")
@@ -153,29 +164,33 @@ fun UserProfileContent(userDetail: UserDetail) {
         Spacer(modifier = Modifier.height(16.dp))
 
         userDetail.company?.let {
-            UserDetailItem(it) { FaIcon(FaIcons.Building) }
+            UserDetailItem(AnnotatedString(it)) { Icon(Icons.Outlined.Business, contentDescription = "Company") }
         }
 
         userDetail.blog?.let {
-            UserDetailItem(it) { Icon(Icons.Outlined.Link, contentDescription = "Location") }
+            val blog = createLinkedText(it)
+            UserDetailItem(blog) { Icon(Icons.Outlined.Link, contentDescription = "Location") }
         }
 
         userDetail.location?.let {
-            UserDetailItem(it) { Icon(Icons.Outlined.LocationOn, contentDescription = "Location") }
+            UserDetailItem(AnnotatedString(it)) { Icon(Icons.Outlined.LocationOn, contentDescription = "Location") }
         }
 
         userDetail.email?.let {
-            UserDetailItem(it) { Icon(Icons.Outlined.Email, contentDescription = "Email") }
+            val email = createMailToLink(it)
+            UserDetailItem(email) { Icon(Icons.Outlined.Email, contentDescription = "Email") }
         }
 
         userDetail.twitterUsername?.let {
-            UserDetailItem(it) { FaIcon(FaIcons.Twitter) }
+            val twitterUrl = "https://x.com/$it"
+            val twitterText = createLinkedText(it, twitterUrl)
+            UserDetailItem(twitterText) { FaIcon(FaIcons.Twitter) }
         }
     }
 }
 
 @Composable
-fun UserDetailItem(text: String, icon: @Composable () -> Unit) {
+fun UserDetailItem(text: AnnotatedString, icon: @Composable () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)
@@ -183,5 +198,57 @@ fun UserDetailItem(text: String, icon: @Composable () -> Unit) {
         icon()
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = text)
+    }
+}
+
+private fun createMailToLink(email: String): AnnotatedString {
+    return buildAnnotatedString {
+        withLink(
+            LinkAnnotation.Url(
+                "mailto:$email",
+                TextLinkStyles(style = SpanStyle(color = Color.Blue))
+            )
+        ) {
+            append(email)
+        }
+    }
+}
+
+private fun createLinkedText(text: String, url: String): AnnotatedString {
+    return buildAnnotatedString {
+        withLink(
+            LinkAnnotation.Url(
+                url,
+                TextLinkStyles(style = SpanStyle(color = Color.Blue))
+            )
+        ) {
+            append(text)
+        }
+    }
+}
+
+private fun createLinkedText(url: String): AnnotatedString {
+    return buildAnnotatedString {
+        withLink(
+            LinkAnnotation.Url(
+                url,
+                TextLinkStyles(style = SpanStyle(color = Color.Blue))
+            )
+        ) {
+            append(url)
+        }
+    }
+}
+
+@Composable
+fun UserEventItem(userEvent: UserEvent) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+    ) {
+        Text(text = userEvent.type)
+        Text(text = userEvent.repo.name)
+        Text(text = userEvent.createdAt.toLocalDateTime())
     }
 }

@@ -2,9 +2,9 @@ package xyz.hanabinoir.githubuserslab.network
 
 import retrofit2.http.GET
 import retrofit2.http.Path
-import xyz.hanabinoir.githubuserslab.model.UserDetail
-import xyz.hanabinoir.githubuserslab.model.UserEvent
-import xyz.hanabinoir.githubuserslab.model.UserItem
+import xyz.hanabinoir.githubuserslab.data.UserDetail
+import xyz.hanabinoir.githubuserslab.data.UserEvent
+import xyz.hanabinoir.githubuserslab.data.UserItem
 
 interface UserService {
     @GET("users")

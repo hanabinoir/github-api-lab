@@ -16,10 +16,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
-import coil.compose.AsyncImage
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import xyz.hanabinoir.githubuserslab.model.UserItem
+import xyz.hanabinoir.githubuserslab.data.UserItem
+import xyz.hanabinoir.githubuserslab.ui.component.AvatarImage
+import xyz.hanabinoir.githubuserslab.ui.component.ErrorContent
+import xyz.hanabinoir.githubuserslab.ui.viewmodel.HomeUiState
+import xyz.hanabinoir.githubuserslab.ui.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,15 +40,7 @@ fun HomeScreen(
             CircularProgressIndicator()
         }
         is HomeUiState.Error -> {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Error loading users")
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = { viewModel.getUsers() }) {
-                    Text(text = "Retry")
-                }
-            }
+            ErrorContent("Error loading users") { viewModel.getUsers() }
         }
         is HomeUiState.Success -> {
             PullToRefreshBox(
@@ -75,14 +70,10 @@ fun UserItemRow(user: UserItem, onClick: () -> Unit) {
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = user.avatarUrl,
-            contentDescription = "Avatar",
-            modifier = Modifier
-                .size(46.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop
-        )
+        val avatarModifier = Modifier
+            .size(46.dp)
+            .clip(CircleShape)
+        AvatarImage(user.avatarUrl, modifier = avatarModifier, contentScale = ContentScale.Crop)
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = user.login,

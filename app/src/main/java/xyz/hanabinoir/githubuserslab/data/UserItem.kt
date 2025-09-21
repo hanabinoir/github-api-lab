@@ -1,4 +1,4 @@
-package xyz.hanabinoir.githubuserslab.model
+package xyz.hanabinoir.githubuserslab.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

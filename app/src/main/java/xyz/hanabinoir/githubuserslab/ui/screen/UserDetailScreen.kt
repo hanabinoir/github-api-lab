@@ -20,7 +20,6 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,11 +40,14 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.guru.fontawesomecomposelib.FaIcon
 import com.guru.fontawesomecomposelib.FaIcons
-import xyz.hanabinoir.githubuserslab.model.UserDetail
-import xyz.hanabinoir.githubuserslab.model.UserEvent
+import xyz.hanabinoir.githubuserslab.data.UserDetail
+import xyz.hanabinoir.githubuserslab.data.UserEvent
+import xyz.hanabinoir.githubuserslab.ui.component.AvatarImage
+import xyz.hanabinoir.githubuserslab.ui.component.ErrorContent
+import xyz.hanabinoir.githubuserslab.ui.viewmodel.UserDetailUiState
+import xyz.hanabinoir.githubuserslab.ui.viewmodel.UserDetailViewModel
 import xyz.hanabinoir.githubuserslab.utility.toLocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,15 +67,7 @@ fun UserDetailScreen(
             CircularProgressIndicator()
         }
         is UserDetailUiState.Error -> {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Error loading users")
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = { viewModel.getUserDetail(username) }) {
-                    Text(text = "Retry")
-                }
-            }
+            ErrorContent("Error loading users") { viewModel.getUserDetail(username) }
         }
         is UserDetailUiState.Success -> {
             LazyColumn(
@@ -126,11 +120,9 @@ fun UserProfileContent(username: String, userDetail: UserDetail) {
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
-                model = userDetail.avatarUrl,
-                contentDescription = "Avatar",
-                modifier = Modifier.size(460.dp)
-            )
+            val avatarModifier = Modifier
+                .size(460.dp)
+            AvatarImage(userDetail.avatarUrl, modifier = avatarModifier)
         }
         Spacer(modifier = Modifier.height(16.dp))
 

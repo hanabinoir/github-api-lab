@@ -1,4 +1,4 @@
-package xyz.hanabinoir.githubuserslab.ui.screen
+package xyz.hanabinoir.githubuserslab.ui.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import xyz.hanabinoir.githubuserslab.model.UserItem
+import xyz.hanabinoir.githubuserslab.data.UserItem
 import xyz.hanabinoir.githubuserslab.network.UserRepository
 import javax.inject.Inject
 
@@ -28,16 +28,16 @@ class MainViewModel @Inject constructor(
         private set
 
     fun getUsers() {
-        Timber.i("Loading users list")
+        Timber.Forest.i("Loading users list")
         viewModelScope.launch {
             uiState = try {
                 isRefreshing = uiState is HomeUiState.Success
                 val users = userRepository.getUsers()
-                Timber.i("Successfully loaded users list, count: ${users.size}")
+                Timber.Forest.i("Successfully loaded users list, count: ${users.size}")
                 isRefreshing = false
                 HomeUiState.Success(users)
             } catch (e: Exception) {
-                Timber.e(e.localizedMessage)
+                Timber.Forest.e(e.localizedMessage)
                 isRefreshing = false
                 HomeUiState.Error
             }

@@ -1,4 +1,4 @@
-package xyz.hanabinoir.githubuserslab.ui.screen
+package xyz.hanabinoir.githubuserslab.ui.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import xyz.hanabinoir.githubuserslab.model.UserDetail
-import xyz.hanabinoir.githubuserslab.model.UserEvent
+import xyz.hanabinoir.githubuserslab.data.UserDetail
+import xyz.hanabinoir.githubuserslab.data.UserEvent
 import xyz.hanabinoir.githubuserslab.network.UserRepository
 import javax.inject.Inject
 
@@ -29,28 +29,28 @@ class UserDetailViewModel @Inject constructor(
         private set
 
     fun getUserDetail(username: String) {
-        Timber.i("Loading user detail for $username")
+        Timber.Forest.i("Loading user detail for $username")
         viewModelScope.launch {
             uiState = try {
                 val userDetail = userRepository.getUserDetail(username)
-                Timber.i("Successfully loaded user detail for $username")
+                Timber.Forest.i("Successfully loaded user detail for $username")
                 UserDetailUiState.Success(userDetail)
             } catch (e: Exception) {
-                Timber.e(e.localizedMessage)
+                Timber.Forest.e(e.localizedMessage)
                 UserDetailUiState.Error
             }
         }
     }
 
     fun getUserEvents(username: String) {
-        Timber.i("Loading user events for $username")
+        Timber.Forest.i("Loading user events for $username")
         viewModelScope.launch {
             userEvents = try {
                 val events = userRepository.getUserEvents(username)
-                Timber.i("Successfully loaded user events for $username, count: ${events.size}")
+                Timber.Forest.i("Successfully loaded user events for $username, count: ${events.size}")
                 events
             } catch (e: Exception) {
-                Timber.e(e.localizedMessage)
+                Timber.Forest.e(e.localizedMessage)
                 emptyList()
             }
         }
